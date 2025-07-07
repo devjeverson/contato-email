@@ -1,5 +1,8 @@
 package com.emails.contatoemail.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,6 +14,14 @@ public class EmailController {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Operation(summary = "Envia um e-mail com os dados recebidos do formulário")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "E-mail enviado com sucesso"),
+            @ApiResponse(responseCode = "500", description = "Erro ao enviar o e-mail")
+    })
+
+
 
     @PostMapping("/send")
     public String sendMail(@RequestBody EmailRequest request) {
@@ -29,5 +40,10 @@ public class EmailController {
         } catch (Exception e) {
             return "Erro ao enviar e-mail: " + e.getMessage();
         }
+    }
+
+    @GetMapping("/")
+    public String home() {
+        return "API ativa. Acesse /swagger-ui/index.html para testar.";
     }
 }
