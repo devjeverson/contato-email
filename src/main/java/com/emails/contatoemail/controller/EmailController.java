@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin // permite requisições do Angular
+@CrossOrigin
 public class EmailController {
 
     @Autowired
@@ -24,10 +26,11 @@ public class EmailController {
 
 
     @PostMapping("/send")
-    public String sendMail(@RequestBody EmailRequest request) {
+    public ResponseEntity<String> sendMail(@RequestBody EmailRequest request) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(request.getEmail());
+            message.setFrom("dsilvajeverson@gmail.com");
+            message.setReplyTo(request.getEmail());
             message.setTo("dsilvajeverson@gmail.com");
             message.setSubject(request.getAssunto());
             message.setText(
@@ -36,12 +39,13 @@ public class EmailController {
                             request.getMensagem()
             );
             mailSender.send(message);
-            return "OK";
+            return ResponseEntity.ok("OK");
         } catch (Exception e) {
-            return "Erro ao enviar e-mail: " + e.getMessage();
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao enviar e-mail: " + e.getMessage());
         }
     }
-
     @GetMapping("/")
     public String home() {
         return "API ativa. Acesse /swagger-ui/index.html para testar.";
