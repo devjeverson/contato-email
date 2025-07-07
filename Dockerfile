@@ -1,14 +1,20 @@
-FROM eclipse-temurin:17-jdk-alpine
+FROM maven:3.9.3-eclipse-temurin-17 AS build
 
-# Define pasta de trabalho
+USER root
+RUN apt-get update && apt-get install -y tzdata
+
 WORKDIR /app
 
-# Copia o JAR gerado pelo Maven
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+COPY pom.xml .
+COPY src ./src
 
-# Expõe a porta padrão
-EXPOSE 8080
+RUN mvn clean package -DskipTests
 
-# Executa o JAR
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY --from=build /app/target/*.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
